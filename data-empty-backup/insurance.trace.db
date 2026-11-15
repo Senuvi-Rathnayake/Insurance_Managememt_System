@@ -1,0 +1,15 @@
+2026-11-15 14:46:23.226193+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+SELECT * FROM USERS [42104-232]
+2026-11-15 14:46:23.229195+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CLAIMS" not found (this database is empty); SQL statement:
+SELECT * FROM CLAIMS [42104-232]
+2026-11-15 14:46:23.230194+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "PAYMENTS" not found (this database is empty); SQL statement:
+SELECT * FROM PAYMENTS [42104-232]
+2026-11-15 14:46:23.231195+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "INQUIRIES" not found (this database is empty); SQL statement:
+SELECT * FROM INQUIRIES [42104-232]
+2026-11-15 14:46:24.775000+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "FEEDBACK" not found (this database is empty); SQL statement:
+SELECT * FROM FEEDBACK [42104-232]

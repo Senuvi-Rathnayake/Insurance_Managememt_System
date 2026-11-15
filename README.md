@@ -1,4 +1,4 @@
-# SecureLife Insurance Portal
+# Insurance Management System
 
 A responsive full-stack insurance customer portal using vanilla HTML/CSS/JavaScript, Express.js REST APIs, and a file-backed H2 database.
 
