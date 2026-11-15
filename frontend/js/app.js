@@ -3,6 +3,7 @@ if (!SecureLife.getToken()) location.replace('/login.html');
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 const formatDate = (value, includeTime = false) => new Intl.DateTimeFormat('en-LK', includeTime ? { dateStyle:'medium', timeStyle:'short' } : { dateStyle:'medium' }).format(new Date(value));
+const formatMoney = (value) => new Intl.NumberFormat('en-LK', { style:'currency', currency:'LKR', minimumFractionDigits:2 }).format(Number(value));
 const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 let claimCache = [];
 
@@ -47,6 +48,7 @@ async function showPage(page, updateHash = true) {
   window.scrollTo({ top:0, behavior:'smooth' });
   if (page === 'notify') await loadProfile();
   if (page === 'claims') await loadClaims();
+  if (page === 'payments') await loadPayments();
   if (page === 'feedback') await loadReviews();
 }
 
@@ -68,6 +70,71 @@ $('#contact-form').addEventListener('submit', async (event) => {
   const button = form.querySelector('button[type=submit]'); SecureLife.setBusy(button, true, 'Sending…');
   try { const result = await SecureLife.api('/inquiries', { method:'POST', body:JSON.stringify(Object.fromEntries(new FormData(form))) }); toast(result.message); form.reset(); }
   catch (error) { toast(error.message, 'error'); } finally { SecureLife.setBusy(button, false); }
+});
+
+const paymentForm = $('#payment-form');
+const cardNumberInput = $('#cardNumber');
+const currentYear = new Date().getFullYear();
+for (let month = 1; month <= 12; month += 1) {
+  const option = document.createElement('option'); option.value = month; option.textContent = String(month).padStart(2, '0'); $('#expiryMonth').append(option);
+}
+for (let year = currentYear; year <= currentYear + 20; year += 1) {
+  const option = document.createElement('option'); option.value = year; option.textContent = year; $('#expiryYear').append(option);
+}
+
+function cardBrand(number) {
+  const digits = number.replace(/\D/g, '');
+  const prefixTwo = Number(digits.slice(0, 2));
+  const prefixFour = Number(digits.slice(0, 4));
+  if (digits.startsWith('4')) return 'Visa';
+  if ((prefixTwo >= 51 && prefixTwo <= 55) || (prefixFour >= 2221 && prefixFour <= 2720)) return 'Mastercard';
+  return 'Card';
+}
+
+cardNumberInput.addEventListener('input', () => {
+  const digits = cardNumberInput.value.replace(/\D/g, '').slice(0, 16);
+  cardNumberInput.value = digits.replace(/(.{4})/g, '$1 ').trim();
+  $('#detected-card').textContent = cardBrand(digits);
+});
+$('#cvv').addEventListener('input', (event) => { event.target.value = event.target.value.replace(/\D/g, '').slice(0, 4); });
+$('#paymentPolicyNumber').addEventListener('input', (event) => { event.target.value = event.target.value.toUpperCase(); });
+
+function paymentReceipt(payment) {
+  return `<article class="payment-record"><div><span class="reference">${escapeHtml(payment.reference_number)}</span><h3>${escapeHtml(payment.payment_type || 'Policy Premium')}</h3><p>Policy ${escapeHtml(payment.policy_number)} · ${escapeHtml(payment.payment_method)} ending ${escapeHtml(payment.card_last_four || '—')}</p></div><div class="payment-record-total"><strong>${formatMoney(payment.amount)}</strong><span class="status-pill approved">${escapeHtml(payment.status)}</span><small>${formatDate(payment.paid_at, true)}</small></div></article>`;
+}
+
+async function loadPayments() {
+  const list = $('#payments-list');
+  list.innerHTML = '<div class="empty">Loading payments…</div>';
+  try {
+    const payments = await SecureLife.api('/payments');
+    list.innerHTML = payments.length ? payments.map(paymentReceipt).join('') : '<div class="empty">You have no completed payments yet.</div>';
+  } catch (error) { list.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`; }
+}
+
+paymentForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!paymentForm.reportValidity()) return;
+  const button = paymentForm.querySelector('button[type=submit]');
+  SecureLife.setBusy(button, true, 'Processing payment…');
+  try {
+    const payload = Object.fromEntries(new FormData(paymentForm));
+    const result = await SecureLife.api('/payments', { method:'POST', body:JSON.stringify(payload) });
+    const payment = result.payment;
+    const confirmation = $('#payment-confirmation');
+    confirmation.innerHTML = `<div class="confirmation-check">✓</div><div><span class="eyebrow eyebrow-blue">Payment successful</span><h2>${escapeHtml(payment.reference_number)}</h2><p>${escapeHtml(result.message)} Save this reference for your records.</p><div class="confirmation-details"><span><b>Policy</b>${escapeHtml(payment.policy_number)}</span><span><b>Amount</b>${formatMoney(payment.amount)}</span><span><b>Paid with</b>${escapeHtml(payment.payment_method)} ending ${escapeHtml(payment.card_last_four)}</span></div><button class="btn btn-secondary" type="button" data-scroll-payments>View payment history</button></div>`;
+    confirmation.classList.remove('hidden');
+    paymentForm.reset();
+    $('#detected-card').textContent = 'Card';
+    await loadPayments();
+    confirmation.scrollIntoView({ behavior:'smooth', block:'start' });
+  } catch (error) { toast(error.message, 'error'); }
+  finally { SecureLife.setBusy(button, false); }
+});
+
+$('#refresh-payments').addEventListener('click', loadPayments);
+$('#payment-confirmation').addEventListener('click', (event) => {
+  if (event.target.closest('[data-scroll-payments]')) $('.payment-history-card').scrollIntoView({ behavior:'smooth', block:'start' });
 });
 
 const accidentForm = $('#accident-form');

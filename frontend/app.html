@@ -2,7 +2,7 @@
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vehicle Insurance | SecureLife</title><link rel="stylesheet" href="css/styles.css"></head>
 <body>
-<header class="site-header"><nav class="navbar container"><a class="brand" href="#home" data-page="home"><span class="brand-mark">◆</span><span>SecureLife Motor</span></a><button class="menu-toggle" id="menu-toggle" aria-label="Open menu">☰</button><div class="nav-links" id="nav-links"><button class="nav-link active" data-page="home">Home</button><button class="nav-link" data-page="contact">Contact Us</button><button class="nav-link" data-page="notify">Notify My Claim</button><button class="nav-link" data-page="claims">Manage Claim</button><button class="nav-link" data-page="payments">Pay Online <small>Soon</small></button><button class="nav-link" data-page="feedback">Reviews <small>Soon</small></button></div><div class="nav-actions"><div class="user-chip"><strong id="user-name">Customer</strong><span>Vehicle policy portal</span></div><button id="logout" class="btn btn-outline">Log out</button></div></nav></header>
+<header class="site-header"><nav class="navbar container"><a class="brand" href="#home" data-page="home"><span class="brand-mark">◆</span><span>SecureLife Motor</span></a><button class="menu-toggle" id="menu-toggle" aria-label="Open menu">☰</button><div class="nav-links" id="nav-links"><button class="nav-link active" data-page="home">Home</button><button class="nav-link" data-page="contact">Contact Us</button><button class="nav-link" data-page="notify">Notify My Claim</button><button class="nav-link" data-page="claims">Manage Claim</button><button class="nav-link" data-page="payments">Pay Online</button><button class="nav-link" data-page="feedback">Reviews <small>Soon</small></button></div><div class="nav-actions"><div class="user-chip"><strong id="user-name">Customer</strong><span>Vehicle policy portal</span></div><button id="logout" class="btn btn-outline">Log out</button></div></nav></header>
 
 <main>
 <section id="page-home" class="app-section active">
@@ -18,7 +18,36 @@
 
 <section id="page-claims" class="app-section"><div class="page-hero"><div class="container"><span class="eyebrow">Accident notifications</span><h1>Manage Claim</h1><p>Track your vehicle accident notifications and status history.</p></div></div><div class="section-pad"><div class="container"><div class="list-card"><div class="record-head"><div><h2>Your notifications</h2><p>Updates are shown newest first.</p></div><button class="btn btn-primary" data-page="notify">+ Report accident</button></div><div id="claims-list" class="record-list"><div class="empty">Loading notifications…</div></div></div></div></div></section>
 
-<section id="page-payments" class="app-section"><div class="coming-page"><div><span class="coming-icon">💳</span><span class="availability">Under development</span><h1>Online payments are coming soon</h1><p>Policy payment services will be available in a future release.</p><button class="btn btn-primary" data-page="home">Return home</button></div></div></section>
+<section id="page-payments" class="app-section">
+  <div class="page-hero payment-hero"><div class="container"><span class="eyebrow">Simple and convenient</span><h1>Pay Online</h1><p>Make a vehicle policy payment and receive your receipt immediately.</p></div></div>
+  <div class="section-pad"><div class="container">
+    <div id="payment-confirmation" class="confirmation-card payment-confirmation hidden"></div>
+    <div class="payment-layout">
+      <form id="payment-form" class="form-card payment-form" novalidate>
+        <div class="payment-form-head"><div><span class="eyebrow eyebrow-blue">Secure checkout</span><h2>Payment details</h2></div><div class="card-brands"><span>VISA</span><span>Mastercard</span></div></div>
+        <div class="payment-notice"><strong>Development payment simulation</strong><span>No real charge will be made. Connect an approved payment gateway before production.</span></div>
+        <h3 class="form-section-title">Policy payment</h3>
+        <div class="form-grid">
+          <div class="field"><label for="paymentPolicyNumber">Policy number</label><input id="paymentPolicyNumber" name="policyNumber" required minlength="3" maxlength="50" placeholder="e.g. MOT-2026-00125" autocomplete="off"></div>
+          <div class="field"><label for="paymentType">Payment type</label><select id="paymentType" name="paymentType" required><option>Policy Premium</option><option>Policy Renewal</option><option>Claim Excess</option></select></div>
+          <div class="field full"><label for="paymentAmount">Amount (LKR)</label><div class="money-input"><span>Rs.</span><input id="paymentAmount" name="amount" type="number" required min="1" max="100000000" step="0.01" placeholder="0.00"></div></div>
+        </div>
+        <h3 class="form-section-title">Card details</h3>
+        <div class="form-grid">
+          <div class="field full"><label for="cardholderName">Name on card</label><input id="cardholderName" name="cardholderName" required minlength="2" maxlength="120" autocomplete="cc-name"></div>
+          <div class="field full"><label for="cardNumber">Card number</label><div class="card-number-wrap"><input id="cardNumber" name="cardNumber" inputmode="numeric" required minlength="15" maxlength="23" autocomplete="cc-number" placeholder="1234 5678 9012 3456"><span id="detected-card">Card</span></div></div>
+          <div class="field"><label>Expiry date</label><div class="expiry-fields"><select id="expiryMonth" name="expiryMonth" required autocomplete="cc-exp-month"><option value="">Month</option></select><select id="expiryYear" name="expiryYear" required autocomplete="cc-exp-year"><option value="">Year</option></select></div></div>
+          <div class="field"><label for="cvv">Security code</label><input id="cvv" name="cvv" type="password" inputmode="numeric" required pattern="[0-9]{3,4}" minlength="3" maxlength="4" autocomplete="cc-csc" placeholder="CVV"></div>
+        </div>
+        <label class="payment-consent"><input id="paymentConsent" type="checkbox" required><span>I confirm that the payment and policy details are correct.</span></label>
+        <button class="btn btn-primary btn-block payment-submit" type="submit">Pay securely</button>
+        <p class="payment-security">🔒 Full card numbers and security codes are never saved in the SecureLife database.</p>
+      </form>
+      <aside class="list-card payment-side"><h2>Payment information</h2><div class="contact-stack"><div class="contact-item"><b>✓</b><div><strong>Instant confirmation</strong><span>A unique payment reference is generated immediately.</span></div></div><div class="contact-item"><b>◈</b><div><strong>Private card data</strong><span>Only the card brand and last four digits appear on your receipt.</span></div></div><div class="contact-item"><b>☎</b><div><strong>Need assistance?</strong><span>Call +94 11 777 2020</span></div></div></div></aside>
+    </div>
+    <div class="list-card payment-history-card"><div class="record-head"><div><span class="eyebrow eyebrow-blue">Receipts</span><h2>Your payment history</h2><p>Completed payments are shown newest first.</p></div><button id="refresh-payments" class="btn btn-outline" type="button">Refresh</button></div><div id="payments-list" class="payment-list"><div class="empty">Loading payments…</div></div></div>
+  </div></div>
+</section>
 <section id="page-feedback" class="app-section"><div class="coming-page"><div><span class="coming-icon">💬</span><span class="availability">Under development</span><h1>Reviews and complaints are coming soon</h1><p>This service will be available in a future release.</p><button class="btn btn-primary" data-page="home">Return home</button></div></div></section>
 </main>
 <footer class="footer"><div class="container"><div class="footer-grid"><div><div class="brand"><span class="brand-mark">◆</span><span>SecureLife Motor</span></div><p>Vehicle protection and claim support for every road ahead.</p></div><div><h3>Vehicle services</h3><div class="footer-links"><a href="#notify" data-page="notify">Notify an accident</a><a href="#claims" data-page="claims">Track a claim</a><a href="#contact" data-page="contact">Contact us</a></div></div><div><h3>24/7 claim hotline</h3><p>+94 11 777 2020<br>motorclaims@securelife.lk</p><a href="agent.html">Agent portal</a></div></div><div class="copyright">© 2026 SecureLife Insurance. Vehicle insurance initial release.</div></div></footer><div id="toast-zone" class="toast-zone"></div><script src="js/common.js"></script><script src="js/app.js"></script></body>

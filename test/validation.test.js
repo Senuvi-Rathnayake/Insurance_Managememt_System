@@ -28,3 +28,23 @@ test('vehicle accident validation rejects future incidents', () => {
   const result = schemas.accident.safeParse({ contactNumber:'+94 77 123 4567', vehicleRegistrationNumber:'CAB-1234', vehicleType:'Car', incidentType:'Collision', incidentAt:'2999-10-10T14:30', accidentLocation:'Colombo', description:'The insured vehicle was involved in a collision.' });
   assert.equal(result.success, false);
 });
+
+test('payment validation accepts a supported card and normalizes the policy number', () => {
+  const result = schemas.payment.safeParse({
+    policyNumber:'pol-vehicle-1001', paymentType:'Policy Premium', amount:'12500.00',
+    cardholderName:'Sam Perera', cardNumber:'4111 1111 1111 1111',
+    expiryMonth:'12', expiryYear:String(new Date().getFullYear() + 1), cvv:'123'
+  });
+  assert.equal(result.success, true);
+  assert.equal(result.data.policyNumber, 'POL-VEHICLE-1001');
+  assert.equal(result.data.cardNumber, '4111111111111111');
+});
+
+test('payment validation rejects an invalid card number', () => {
+  const result = schemas.payment.safeParse({
+    policyNumber:'POL-1001', paymentType:'Policy Renewal', amount:5000,
+    cardholderName:'Sam Perera', cardNumber:'4111 1111 1111 1112',
+    expiryMonth:12, expiryYear:new Date().getFullYear() + 1, cvv:'123'
+  });
+  assert.equal(result.success, false);
+});

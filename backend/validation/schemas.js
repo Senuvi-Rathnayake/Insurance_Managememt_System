@@ -25,11 +25,35 @@ const claim = z.object({
   estimatedAmount: z.coerce.number().min(0, 'Amount cannot be negative.').max(100000000),
   description: text('Description', 20, 2500)
 }).refine((data) => new Date(data.incidentDate) <= new Date(), { path: ['incidentDate'], message: 'Incident date cannot be in the future.' });
+const luhnValid = (number) => {
+  let sum = 0;
+  let doubleDigit = false;
+  for (let index = number.length - 1; index >= 0; index -= 1) {
+    let digit = Number(number[index]);
+    if (doubleDigit) { digit *= 2; if (digit > 9) digit -= 9; }
+    sum += digit;
+    doubleDigit = !doubleDigit;
+  }
+  return sum % 10 === 0;
+};
+const supportedCard = (number) => {
+  const prefixTwo = Number(number.slice(0, 2));
+  const prefixFour = Number(number.slice(0, 4));
+  return /^4\d{12}(\d{3})?$/.test(number) || ((prefixTwo >= 51 && prefixTwo <= 55) || (prefixFour >= 2221 && prefixFour <= 2720)) && number.length === 16;
+};
 const payment = z.object({
-  policyNumber: text('Policy number', 3, 50),
+  policyNumber: text('Policy number', 3, 50).transform((value) => value.toUpperCase()),
+  paymentType: z.enum(['Policy Premium', 'Policy Renewal', 'Claim Excess']),
   amount: z.coerce.number().positive('Amount must be greater than zero.').max(100000000),
-  paymentMethod: z.enum(['Visa', 'Mastercard', 'Bank Transfer'])
-});
+  cardholderName: text('Cardholder name', 2, 120),
+  cardNumber: z.string().trim().transform((value) => value.replace(/[ -]/g, '')).refine((value) => /^\d{13,19}$/.test(value), 'Enter a valid card number.').refine(supportedCard, 'Only Visa and Mastercard are supported.').refine(luhnValid, 'Enter a valid card number.'),
+  expiryMonth: z.coerce.number().int().min(1).max(12),
+  expiryYear: z.coerce.number().int().min(new Date().getFullYear()).max(new Date().getFullYear() + 20),
+  cvv: z.string().trim().regex(/^\d{3,4}$/, 'Enter a valid security code.')
+}).refine((data) => {
+  const expiry = new Date(data.expiryYear, data.expiryMonth, 0, 23, 59, 59);
+  return expiry >= new Date();
+}, { path: ['expiryMonth'], message: 'The card has expired.' });
 const feedback = z.object({
   feedbackType: z.enum(['Review', 'Complaint']),
   rating: z.coerce.number().int().min(1).max(5).optional(),
