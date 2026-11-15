@@ -7,7 +7,8 @@ function setSession(token, user) { sessionStorage.setItem(TOKEN_KEY, token); ses
 function clearSession() { sessionStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(USER_KEY); }
 
 async function api(path, options = {}) {
-  const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers };
+  const isForm = options.body instanceof FormData;
+  const headers = { ...(options.body && !isForm ? { 'Content-Type': 'application/json' } : {}), ...options.headers };
   if (getToken()) headers.Authorization = `Bearer ${getToken()}`;
   const response = await fetch(`/api${path}`, { ...options, headers });
   const data = await response.json().catch(() => ({}));

@@ -13,6 +13,8 @@ module.exports = {
   h2Port: Number(process.env.H2_PORT || 5435),
   h2User: process.env.H2_USER || 'sa',
   h2Password: process.env.H2_PASSWORD || 'securelife-local-db',
+  agentUsername: process.env.AGENT_USERNAME || 'claims.agent',
+  agentPassword: process.env.AGENT_PASSWORD || 'Agent123!',
   jwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '8h',
   isProduction,

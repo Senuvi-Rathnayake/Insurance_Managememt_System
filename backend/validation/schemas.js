@@ -37,4 +37,20 @@ const feedback = z.object({
   message: text('Message', 10, 2000)
 }).refine((data) => data.feedbackType !== 'Review' || data.rating, { path: ['rating'], message: 'Please rate your experience.' });
 
-module.exports = { register, login, inquiry, claim, payment, feedback };
+const accident = z.object({
+  contactNumber: z.string().trim().regex(/^\+?[0-9 ()-]{7,20}$/, 'Enter a valid contact number.'),
+  vehicleRegistrationNumber: text('Vehicle registration number', 2, 30).transform((value) => value.toUpperCase()),
+  vehicleType: z.enum(['Car', 'Van', 'Motorcycle', 'Three Wheeler', 'Truck', 'Bus', 'Other']),
+  incidentType: z.enum(['Collision', 'Vehicle Damage', 'Fire', 'Theft', 'Other']),
+  incidentAt: z.string().refine((value) => !Number.isNaN(Date.parse(value)), 'Select a valid incident date and time.'),
+  accidentLocation: text('Accident location', 3, 240),
+  description: text('Description', 20, 2500)
+}).refine((data) => new Date(data.incidentAt) <= new Date(), { path: ['incidentAt'], message: 'Incident date and time cannot be in the future.' });
+
+const agentLogin = z.object({ username: text('Username', 1, 50), password: z.string().min(1, 'Password is required.').max(72) });
+const statusUpdate = z.object({
+  status: z.enum(['Pending', 'Under Review', 'Agent Contacted', 'Processing', 'Approved', 'Rejected', 'Closed']),
+  note: z.string().trim().max(500, 'Note is too long.').optional().default('')
+});
+
+module.exports = { register, login, inquiry, claim, payment, feedback, accident, agentLogin, statusUpdate };

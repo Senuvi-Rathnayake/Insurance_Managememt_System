@@ -30,7 +30,7 @@ router.post('/login', validate(schemas.login), async (req, res, next) => {
     const result = await db.query('SELECT id, full_name, username, email, password_hash FROM users WHERE LOWER(username)=LOWER($1) OR LOWER(email)=LOWER($1)', [username]);
     const user = result.rows[0];
     if (!user || !(await bcrypt.compare(password, user.password_hash))) return res.status(401).json({ message: 'Invalid username or password.' });
-    const token = jwt.sign({ id: user.id, username: user.username, name: user.full_name }, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
+    const token = jwt.sign({ id: user.id, username: user.username, name: user.full_name, role: 'customer' }, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
     return res.json({ token, user: { id: user.id, fullName: user.full_name, username: user.username, email: user.email } });
   } catch (error) { return next(error); }
 });

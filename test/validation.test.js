@@ -17,3 +17,14 @@ test('claim validation rejects a future incident date', () => {
   const result = schemas.claim.safeParse({ policyNumber:'POL-100', claimType:'Motor', incidentDate:'2999-01-01', incidentLocation:'Colombo', estimatedAmount:1000, description:'A sufficiently detailed incident description.' });
   assert.equal(result.success, false);
 });
+
+test('vehicle accident validation accepts complete incident details', () => {
+  const result = schemas.accident.safeParse({ contactNumber:'+94 77 123 4567', vehicleRegistrationNumber:'cab-1234', vehicleType:'Car', incidentType:'Collision', incidentAt:'2026-10-10T14:30', accidentLocation:'Galle Road, Colombo', description:'The insured vehicle was involved in a rear-end collision.' });
+  assert.equal(result.success, true);
+  assert.equal(result.data.vehicleRegistrationNumber, 'CAB-1234');
+});
+
+test('vehicle accident validation rejects future incidents', () => {
+  const result = schemas.accident.safeParse({ contactNumber:'+94 77 123 4567', vehicleRegistrationNumber:'CAB-1234', vehicleType:'Car', incidentType:'Collision', incidentAt:'2999-10-10T14:30', accidentLocation:'Colombo', description:'The insured vehicle was involved in a collision.' });
+  assert.equal(result.success, false);
+});
