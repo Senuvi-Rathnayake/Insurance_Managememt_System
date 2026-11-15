@@ -163,10 +163,18 @@ $('#claims-list').addEventListener('click', (event) => {
 function statusClass(status) { return status.toLowerCase().replaceAll(' ', '-'); }
 
 async function loadClaims() {
-  const list = $('#claims-list'); list.innerHTML = '<div class="empty">Loading notifications…</div>';
+  const list = $('#claims-list');
+  list.innerHTML = '<div class="empty">Loading notifications…</div>';
   try {
     claimCache = await SecureLife.api('/accidents');
-    list.innerHTML = claimCache.length ? claimCache.map((n) => `<article class="claim-card"><div class="record-head"><div><span class="reference">${escapeHtml(n.reference_number)}</span><h3>${escapeHtml(n.registration_number)} · ${escapeHtml(n.vehicle_type)}</h3></div><span class="status-pill ${statusClass(n.status)}">${escapeHtml(n.status)}</span></div><div class="claim-summary"><span><b>Incident type</b>${escapeHtml(n.incident_type)}</span><span><b>Incident date</b>${formatDate(n.incident_at, true)}</span><span><b>Submitted</b>${formatDate(n.submitted_at, true)}</span><span><b>Location</b>${escapeHtml(n.accident_location)}</span></div><p>${escapeHtml(n.description)}</p>${n.status === 'Pending' ? `<div class="claim-actions"><button class="btn btn-secondary" data-claim-action="edit" data-id="${n.id}">Edit notification</button><button class="btn btn-danger" data-claim-action="delete" data-id="${n.id}">Delete</button></div>` : '<p class="locked-note">Agent processing has started; this notification is now read-only.</p>'}<details><summary>Status history (${n.history.length})</summary><div class="timeline">${n.history.map((h) => `<div class="timeline-item"><i></i><div><strong>${escapeHtml(h.status)}</strong><span>${formatDate(h.changed_at, true)}</span>${h.note ? `<p>${escapeHtml(h.note)}</p>` : ''}</div></div>`).join('')}</div></details></article>`).join('') : '<div class="empty">You have not reported any vehicle accidents yet.</div>';
+    list.innerHTML = claimCache.length ? claimCache.map((n) => `
+      <article class="claim-card">
+        <div class="record-head"><div><span class="reference">${escapeHtml(n.reference_number)}</span><h3>${escapeHtml(n.registration_number)} · ${escapeHtml(n.vehicle_type)}</h3></div><span class="status-pill ${statusClass(n.status)}">${escapeHtml(n.status)}</span></div>
+        <div class="claim-summary"><span><b>Incident type</b>${escapeHtml(n.incident_type)}</span><span><b>Incident date</b>${formatDate(n.incident_at, true)}</span><span><b>Submitted</b>${formatDate(n.submitted_at, true)}</span><span><b>Location</b>${escapeHtml(n.accident_location)}</span></div>
+        <p>${escapeHtml(n.description)}</p>
+        ${n.status === 'Pending' ? `<div class="claim-actions"><button class="btn btn-secondary" data-claim-action="edit" data-id="${n.id}">Edit notification</button><button class="btn btn-danger" data-claim-action="delete" data-id="${n.id}">Delete</button></div>` : '<p class="locked-note">Agent processing has started; this notification is now read-only.</p>'}
+        <details><summary>Status history (${n.history.length})</summary><div class="timeline">${n.history.map((h) => `<div class="timeline-item"><i></i><div><strong>${escapeHtml(h.status)}</strong><span>${formatDate(h.changed_at, true)}${h.agent_name ? ` · Updated by ${escapeHtml(h.agent_name)}` : ''}</span>${h.note ? `<p>${escapeHtml(h.note)}</p>` : ''}</div></div>`).join('')}</div></details>
+      </article>`).join('') : '<div class="empty">You have not reported any vehicle accidents yet.</div>';
   } catch (error) { list.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`; }
 }
 

@@ -25,12 +25,18 @@ router.get('/notifications', async (req, res, next) => {
   try {
     const result = await db.query(`SELECT n.id, n.reference_number, n.contact_number, n.incident_type, n.incident_at,
       n.accident_location, n.description, n.status, n.submitted_at, n.updated_at,
-      v.registration_number, v.vehicle_type, u.full_name, u.email, u.phone
-      FROM accident_notifications n JOIN vehicles v ON v.id=n.vehicle_id JOIN users u ON u.id=n.user_id
+      v.registration_number, v.vehicle_type, u.full_name, u.email, u.phone,
+      assigned.full_name AS assigned_agent_name
+      FROM accident_notifications n
+      JOIN vehicles v ON v.id=n.vehicle_id
+      JOIN users u ON u.id=n.user_id
+      LEFT JOIN agents assigned ON assigned.id=n.assigned_agent_id
       ORDER BY CASE WHEN n.status='Pending' THEN 0 ELSE 1 END, n.submitted_at DESC`);
     for (const item of result.rows) {
       const photos = await db.query('SELECT id, original_name, mime_type, file_size FROM accident_photos WHERE notification_id=$1', [item.id]);
-      const history = await db.query('SELECT status, note, changed_at FROM claim_status_history WHERE notification_id=$1 ORDER BY changed_at', [item.id]);
+      const history = await db.query(`SELECT h.status, h.note, h.changed_at, a.full_name AS agent_name
+        FROM claim_status_history h LEFT JOIN agents a ON a.id=h.changed_by_agent_id
+        WHERE h.notification_id=$1 ORDER BY h.changed_at`, [item.id]);
       item.photos = photos.rows;
       item.history = history.rows;
     }
@@ -40,6 +46,9 @@ router.get('/notifications', async (req, res, next) => {
 
 router.patch('/notifications/:id/status', validate(schemas.statusUpdate), async (req, res, next) => {
   try {
+    if (req.validated.status === 'Rejected' && !req.validated.note?.trim()) {
+      return res.status(400).json({ message: 'Please add a reason before rejecting a claim.' });
+    }
     const existing = await db.query('SELECT id FROM accident_notifications WHERE id=$1', [req.params.id]);
     if (!existing.rows[0]) return res.status(404).json({ message: 'Notification not found.' });
     await db.query('UPDATE accident_notifications SET status=$1, assigned_agent_id=$2, updated_at=CURRENT_TIMESTAMP WHERE id=$3', [req.validated.status, req.user.id, req.params.id]);

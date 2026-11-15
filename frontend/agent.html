@@ -1,2 +1,58 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claims Agent Portal | SecureLife</title><link rel="stylesheet" href="css/styles.css"></head>
-<body class="agent-body"><header class="agent-header"><div class="container"><a class="brand" href="/"><span class="brand-mark">◆</span><span>SecureLife Claims Desk</span></a><button id="agent-logout" class="btn btn-secondary hidden">Log out</button></div></header><main class="agent-main container"><section id="agent-login-panel" class="form-card agent-login"><h1>Agent sign in</h1><p>Access vehicle accident notifications and update claim progress.</p><div id="agent-alert" class="alert hidden"></div><form id="agent-login-form"><div class="field"><label for="agentUsername">Username</label><input id="agentUsername" name="username" required autocomplete="username"></div><div class="field"><label for="agentPassword">Password</label><input id="agentPassword" name="password" type="password" required autocomplete="current-password"></div><button class="btn btn-primary btn-block" type="submit">Sign in</button></form><p class="small-note">Development account details are configured in the project’s environment file.</p></section><section id="agent-dashboard" class="hidden"><div class="agent-toolbar"><div><span class="eyebrow eyebrow-blue">Claims operations</span><h1>Vehicle accident notifications</h1><p id="agent-welcome"></p></div><button id="refresh-agent" class="btn btn-outline">Refresh</button></div><div id="agent-notifications" class="agent-grid"><div class="empty">Loading notifications…</div></div></section></main><div id="toast-zone" class="toast-zone"></div><script src="js/agent.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Insurance Agent Administration | SecureLife</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="agent-body">
+  <header class="agent-header">
+    <div class="container">
+      <a class="brand" href="agent.html"><span class="brand-mark">◆</span><span>SecureLife Agent Administration</span></a>
+      <div class="agent-header-actions">
+        <a class="agent-customer-link" href="login.html">Customer portal</a>
+        <button id="agent-logout" class="btn btn-secondary hidden">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="agent-main container">
+    <section id="agent-login-panel" class="form-card agent-login">
+      <span class="eyebrow eyebrow-blue">Authorised staff only</span>
+      <h1>Insurance agent login</h1>
+      <p>Review vehicle accident notifications, contact customers, and manage claim decisions.</p>
+      <div id="agent-alert" class="alert hidden"></div>
+      <form id="agent-login-form">
+        <div class="field"><label for="agentUsername">Agent username</label><input id="agentUsername" name="username" required autocomplete="username" placeholder="Enter your agent username"></div>
+        <div class="field"><label for="agentPassword">Password</label><input id="agentPassword" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password"></div>
+        <button class="btn btn-primary btn-block" type="submit">Open agent dashboard</button>
+      </form>
+      <p class="small-note">Agent accounts are created and managed by the insurance company.</p>
+    </section>
+
+    <section id="agent-dashboard" class="hidden">
+      <div class="agent-toolbar">
+        <div><span class="eyebrow eyebrow-blue">Claims operations</span><h1>Vehicle claim administration</h1><p id="agent-welcome"></p></div>
+        <button id="refresh-agent" class="btn btn-outline">Refresh claims</button>
+      </div>
+
+      <div class="agent-metrics" aria-label="Claim summary">
+        <article><span>All claims</span><strong id="metric-total">0</strong></article>
+        <article><span>Awaiting review</span><strong id="metric-pending">0</strong></article>
+        <article><span>In progress</span><strong id="metric-active">0</strong></article>
+        <article><span>Resolved</span><strong id="metric-resolved">0</strong></article>
+      </div>
+
+      <div class="agent-filters">
+        <label><span>Search claims</span><input id="agent-search" type="search" placeholder="Reference, customer, email, or vehicle"></label>
+        <label><span>Status</span><select id="agent-status-filter"><option value="">All statuses</option><option>Pending</option><option>Under Review</option><option>Agent Contacted</option><option>Processing</option><option>Approved</option><option>Rejected</option><option>Closed</option></select></label>
+      </div>
+
+      <div id="agent-notifications" class="agent-grid"><div class="empty">Loading notifications…</div></div>
+    </section>
+  </main>
+  <div id="toast-zone" class="toast-zone"></div>
+  <script src="js/agent.js"></script>
+</body>
+</html>
